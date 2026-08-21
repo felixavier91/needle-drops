@@ -171,28 +171,6 @@
     color:var(--text-dim);
     white-space:nowrap;
   }
-  .chips{display:flex;flex-wrap:wrap;gap:8px;}
-  .chip{
-    font-family:"IBM Plex Mono", monospace;
-    font-size:12px;
-    letter-spacing:.01em;
-    padding:6px 11px;
-    border-radius:999px;
-    border:1px solid var(--border);
-    background:var(--surface);
-    color:var(--text-dim);
-    cursor:pointer;
-    user-select:none;
-  }
-  .chip:hover{color:var(--text);border-color:var(--accent-soft);}
-  .chip.active{
-    background:var(--accent);
-    border-color:var(--accent);
-    color:var(--bg);
-    font-weight:500;
-  }
-  .chip:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
-
   /* ---------- List ---------- */
   .list{margin-top:8px;}
   .row{
@@ -273,20 +251,6 @@
     color:var(--text-dim);
     font-style:italic;
   }
-  .tag-pill{
-    display:inline-block;
-    margin-top:6px;
-    font-family:"IBM Plex Mono", monospace;
-    font-size:10.5px;
-    letter-spacing:.06em;
-    text-transform:uppercase;
-    padding:2px 8px;
-    border-radius:999px;
-    background:var(--surface-2);
-    border:1px solid var(--border);
-    color:var(--text-dim);
-  }
-
   .empty{
     display:none;
     padding:60px 4px;
@@ -340,7 +304,7 @@
   }
 
   @media (prefers-reduced-motion:no-preference){
-    .chip, .song-btn, .row{transition:background-color .12s ease, color .12s ease, border-color .12s ease;}
+    .song-btn, .row{transition:background-color .12s ease, color .12s ease, border-color .12s ease;}
   }
 </style>
 </head>
@@ -356,10 +320,9 @@
       <div class="stat"><b>79</b><span>From film</span></div>
       <div class="stat"><b>21</b><span>From TV</span></div>
       <div class="stat"><b>1967–2023</b><span>Span</span></div>
-      <div class="stat"><b>10</b><span>Moods</span></div>
-      <div class="stat"><b>41</b><span>With chords</span></div>
+      <div class="stat"><b>100</b><span>With chords</span></div>
     </div>
-    <div class="note"><strong>Playback:</strong> this page embeds Spotify's own player, so nothing is downloaded or rehosted — audio streams straight from Spotify. Without being logged in you'll get a 30-second preview per track, which is plenty to know if it's for you; log in to Spotify in another tab first for full playback.<br><br><strong>Chords:</strong> a monospace line under a track shows its verse/chorus progression, sourced from published chord charts. Only 41 of 100 are filled in so far — the rest simply have no chord line yet, that's not a claim the chords don't exist.</div>
+    <div class="note"><strong>Playback:</strong> this page embeds Spotify's own player, so nothing is downloaded or rehosted — audio streams straight from Spotify. Without being logged in you'll get a 30-second preview per track, which is plenty to know if it's for you; log in to Spotify in another tab first for full playback.<br><br><strong>Chords:</strong> a monospace line under a track shows its verse/chorus progression, sourced from published chord charts. These are best-effort transcriptions from third-party chord/tab sites, not verified against the original recordings note-for-note.</div>
   </div>
 </div>
 
@@ -369,7 +332,6 @@
       <input type="search" id="search" placeholder="Search song, artist, or movie/show…" autocomplete="off">
       <span class="count" id="count">100 shown</span>
     </div>
-    <div class="chips" id="chips"></div>
   </div>
 </div>
 
@@ -498,8 +460,7 @@
   ].map(([song,artist,source,year,media,tag,note,spotifyId])=>({song,artist,source,year,media,tag,note,spotifyId}));
 
   // Verse/chorus chord progressions, by TRACKS index. Sourced from published chord/tab
-  // charts (chords only, no lyrics). Not every track has been looked up yet — entries
-  // simply don't appear for the rest, rather than showing a "not found" placeholder.
+  // charts (chords only, no lyrics).
   const CHORDS = {
     0:{v:"D – G7 – D",c:"A – C – G – D"},
     1:{v:"G – F – D",c:"G – D – C – Em – F – D"},
@@ -508,6 +469,24 @@
     4:{one:"C – F – G7",note:"12-bar blues form"},
     5:{v:"Gm – C – F – Eb",c:"Gm – C – F – Gm"},
     6:{one:"E – A – B",note:"verse/chorus not clearly distinguished in available charts"},
+    7:{one:"Em – Am – B7 – Em",note:"tremolo-guitar arrangement; some chord charts use capo I with Dm/Gm instead"},
+    8:{one:"Em – A – Em",note:"instrumental; key of E minor"},
+    9:{one:"Bb – Cm – F – Ab",note:"key of C minor"},
+    10:{one:"Bm – G – A – F#m",note:"capo 2nd fret; key of B minor"},
+    11:{one:"Db – Gb – B7 – Ab",note:"piano coda/outro only, not the main song"},
+    12:{v:"C# – B – A",c:"C# – B – A – E",note:"open E tuning"},
+    13:{one:"D – Bm – Bm7 – G – Em – A – A7 – D – B – B7 – Em – A7 – A",note:"1953 pop standard, AABA form; key of D"},
+    14:{one:"D – G – C – D",note:"largely a one-chord (D) vamp with occasional shifts"},
+    15:{one:"D – C – D",note:"riff-driven; verse shifts to D7 – C7 over the same figure"},
+    16:{one:"A – A – A – A",note:"one-chord blues vamp (Bo Diddley beat); some charts show A5 – D5 – C5 – A5"},
+    17:{one:"Bm – F# – A – E – G – D – Em – F#",note:"Gipsy Kings rumba cover; differs from the Eagles original"},
+    18:{one:"G – Am – D – C",note:"verse/chorus not clearly distinguished in available charts"},
+    19:{one:"E – A",note:"same E–A vamp through verse and chorus"},
+    20:{one:"Dm – D – G",note:"instrumental groove; largely riff-driven"},
+    21:{v:"G – D – G7 – C",c:"Cm – D7 – B7 – G",note:"capo 1st fret"},
+    22:{v:"G – A – D – Bm",note:"intro is G – Em – D; no clearly separate chorus"},
+    23:{one:"B – D",note:"simplified; largely riff/power-chord driven"},
+    24:{v:"F – Em7 – A – Dm – G – Em – A – Bb – Bb/C – F – Bb/C",c:"Dm – F – Bb – F – Gm – F – Eb – Bb"},
     25:{one:"G – Am – Em"},
     26:{one:"D – G – Em – G"},
     27:{one:"Ab – Fm – Cm – Gm"},
@@ -518,6 +497,21 @@
     32:{one:"C – Am – F – G"},
     33:{one:"G – Em – C – D",note:"folk structure, no separate chorus"},
     34:{v:"Am – F – G",c:"F – C – G"},
+    35:{v:"Em – Am",c:"Am – D – G – G/F♯ – Em – D"},
+    36:{v:"E – A – B – E",c:"B – E – A – B – E",note:"capo 2nd fret"},
+    37:{v:"A – D",c:"A – D – G – F♯/D – A",note:"riff-driven, verse and chorus share the A–D vamp"},
+    38:{v:"A – E – F♯m – D – G",c:"F♯m – E – D – A",note:"capo 1st fret"},
+    39:{v:"D/E – E – Esus4",c:"E – C♯m7 – D – Bm7",note:"key of E"},
+    40:{v:"G – Bm – C",c:"E – A – B",note:"chorus modulates up to E major"},
+    41:{v:"E – D – A",c:"E – Dsus2 – Asus2 – A"},
+    42:{v:"F – Dm – Bb – C",c:"D – G – A"},
+    43:{v:"Bm – A – D – G",c:"E – Esus4 – D – Dsus4"},
+    44:{one:"D – G – A",note:"I–IV–V vamp throughout, no distinct verse/chorus; key of D"},
+    45:{one:"Bb – C7 – F7 – Cm7 (ballad) – A → Eb (operatic) – Eb – F7 – Bb7 (hard rock)",note:"six-section suite (ballad/opera/rock/coda), no conventional verse-chorus form"},
+    46:{v:"D – G – Gm – D/F♯",c:"D – D7 – G – Em – G7"},
+    47:{one:"Am – G – Am – C – F – C",note:"capo 6th fret; verses only, no distinct chorus"},
+    48:{v:"E – E7 – A – D – G – C – Am",c:"D – G – Em – C – Am7 – D"},
+    49:{v:"E – D – A",c:"G – A – E",note:"key of E, chords borrowed from E Mixolydian"},
     50:{one:"A – G – D – E",note:"riff-driven, same chords throughout"},
     51:{v:"C – F/C – G – Em7 – Am7 – D7",c:"F – C – Dm – Em"},
     52:{one:"C – C/B – Am – G – F – Fsus4 – F",note:"through-composed, no distinct chorus"},
@@ -531,6 +525,18 @@
     60:{one:"Ab – Db – Eb"},
     61:{one:"Am7 – D – C – E – Am – F",note:"capo 3rd fret, largely instrumental"},
     62:{v:"Em – G – D – A",c:"Em – A"},
+    63:{one:"Em – A",note:"same two-chord vamp through verse and chorus; capo 1st fret"},
+    64:{v:"C – D – Em – D",c:"Am – D – Em – D – G – D"},
+    65:{v:"Cmaj7 – Bm",c:"C – D – Cmaj7 – Bm"},
+    66:{v:"C – Am – F – G",c:"C – G – Am – Em – F – G – C7"},
+    67:{v:"E – Bsus4 – Aadd9 – E – B",c:"C♯m – B – A – B",note:"key of E"},
+    68:{v:"Em7 – D/F♯ – G – C – G – D",c:"Am – D/F♯ – G – D – Em"},
+    69:{v:"C – F (×4) – Am – G – F",c:"C – G – Am – G – F – C – G – F"},
+    70:{v:"C – D♯dim – F – C – A7 – Dm – Fm6 – C – Dm7 – G7 – C",c:"Ab – Eb – Db – C – Fm – Bb – Eb – C – D7 – G",note:"chorus modulates up from the verse key"},
+    71:{v:"Dm7 – C9 – Am7 – Em7 – Am7 – C/G",c:"Dm7 – Am7 – G/B – C – G/B – Am7 – C – G",note:"key of A minor"},
+    72:{v:"Am – Dm – G – Cmaj7",c:"A – D – Bm – E",note:"chorus modulates up from the verse key"},
+    73:{v:"Em7 – D – Em7 – A",c:"Em7 – D – Em7 – Bm7",note:"capo 1st fret; mostly a one-chord funk vamp (sounds as Fm7)"},
+    74:{v:"C – F – G – F – Em – Dm – Dm7/G",c:"G/C – C – F – Bb – F/A – G"},
     75:{v:"D – A – Bm – G – A – D",c:"A – D – A – Bm – Asus4"},
     76:{one:"A – B7 – G – D – F – C – E7",note:"no clean verse/chorus split; key of A"},
     77:{v:"Cm – Ab – Bb – Gm – Am",c:"Abmaj7 – Bb – Cm"},
@@ -541,7 +547,21 @@
     82:{v:"Am – C – F – F"},
     83:{one:"A – E/G♯ – D – A",note:"same progression throughout verse and chorus"},
     84:{v:"A – E – F#m – D",c:"A – Emaj7 – F#m – Dmaj7",note:"B9 appears occasionally"},
-    85:{one:"E – E – Em – Bm"}
+    85:{one:"E – E – Em – Bm"},
+    86:{v:"Am – Am – Am – Am – E7 – E7 – Am – Dm – Dm – Am",c:"Am – Am – Am – Am – E7 – E7 – Am – E7 – Am",note:"transposed from the original key of F#m; Am/E7 vamp throughout"},
+    87:{v:"A – C#m – F#m",c:"F#m – D – A – E",note:"key of A; some charts use capo 2nd fret"},
+    88:{v:"Dm – Am/D – Bb/D – F/D",c:"Dm – C – Bb – C"},
+    89:{one:"Am – Dm – Am – Em – Dm – Am",note:"gospel-blues loop, no distinct chorus"},
+    90:{one:"Bm – Em – F#m",note:"two/three-chord vamp throughout, no clear verse/chorus split"},
+    91:{one:"Am – E – Dm – Am",note:"True Detective S1 theme; same loop through verse and chorus, key of Am"},
+    92:{one:"Dsus2/G – Dsus2 – Dsus2/F – Asus4",note:"trip-hop loop, no distinct verse/chorus"},
+    93:{v:"C#m – Asus4 – E",c:"Asus4 – E",note:"same three chords cycle through verse and chorus"},
+    94:{v:"B – E – F# – B",note:"modulates to C# – F# – G# – C# for the outro"},
+    95:{one:"C – F – Cm – G",note:"instrumental jazz/big-band theme; approximate chord movement, extended sax solo"},
+    96:{v:"Gm – Fadd9 – Cm – Fadd9",c:"Eb – Gm – Eb – Cm – Gm – Fadd9 – Cm – F"},
+    97:{v:"E – Amaj9 – B7add11",c:"E – Amaj7 – B7",note:"capo 2 versions simplify to D – G – A"},
+    98:{v:"C – C/B – Am – F – G – Am – F – G – E – Am",c:"F – Am – F – C – G – C – G",note:"John Cale's arrangement of the standard Hallelujah progression"},
+    99:{v:"G – D – Am – C",c:"G5 – C5 – C5/C# – C5",note:"chorus uses power chords"}
   };
 
   function chordLine(idx){
@@ -561,7 +581,6 @@
   }
 
   const listEl = document.getElementById('list');
-  const chipsEl = document.getElementById('chips');
   const searchEl = document.getElementById('search');
   const countEl = document.getElementById('count');
   const emptyEl = document.getElementById('empty');
@@ -569,9 +588,6 @@
   const playerTrack = document.getElementById('playerTrack');
   const pSong = document.getElementById('pSong');
   const pMeta = document.getElementById('pMeta');
-
-  const TAGS = [...new Set(TRACKS.map(t=>t.tag))];
-  let activeTag = 'All';
 
   // ---------- Spotify IFrame API ----------
   let spotifyController = null;
@@ -612,27 +628,12 @@
     if (row) row.classList.add('playing');
   }
 
-  function renderChips(){
-    const all = ['All', ...TAGS];
-    chipsEl.innerHTML = all.map(tag =>
-      `<button class="chip${tag===activeTag?' active':''}" data-tag="${tag}" type="button">${tag}</button>`
-    ).join('');
-    chipsEl.querySelectorAll('.chip').forEach(btn=>{
-      btn.addEventListener('click', ()=>{
-        activeTag = btn.dataset.tag;
-        render();
-      });
-    });
-  }
-
   function render(){
     const q = searchEl.value.trim().toLowerCase();
     const filtered = TRACKS
       .map((t, idx) => ({...t, idx}))
       .filter(t=>{
-        const matchesTag = activeTag === 'All' || t.tag === activeTag;
-        const matchesQ = !q || [t.song,t.artist,t.source].some(f=>f.toLowerCase().includes(q));
-        return matchesTag && matchesQ;
+        return !q || [t.song,t.artist,t.source].some(f=>f.toLowerCase().includes(q));
       })
       .sort((a,b)=> b.year - a.year);
 
@@ -650,7 +651,6 @@
           <div class="source-line"><span class="src">${t.source}</span> · <span class="year">${t.year}</span> · ${t.media === 'tv' ? 'TV' : 'Film'}</div>
           <div class="note-line">${t.note}</div>
           ${chordLine(t.idx)}
-          <span class="tag-pill">${t.tag}</span>
         </div>
       </div>
     `).join('');
@@ -660,7 +660,6 @@
     });
   }
 
-  renderChips();
   render();
   searchEl.addEventListener('input', render);
 </script>
