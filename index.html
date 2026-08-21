@@ -256,17 +256,12 @@
     color:var(--accent);
     border-bottom-color:var(--accent);
   }
-  .tutorial-line{
-    margin-top:5px;
-    font-family:"IBM Plex Mono", monospace;
-    font-size:12px;
-  }
-  .tutorial-link{
+  .chord-label{
     color:var(--text);
     text-decoration:none;
     border-bottom:1px dotted var(--text-dim);
   }
-  .tutorial-link:hover{
+  .chord-label:hover{
     color:var(--accent);
     border-bottom-color:var(--accent);
   }
@@ -341,7 +336,7 @@
       <div class="stat"><b>1967–2023</b><span>Span</span></div>
       <div class="stat"><b>100</b><span>With chords</span></div>
     </div>
-    <div class="note"><strong>Playback:</strong> this page embeds Spotify's own player, so nothing is downloaded or rehosted — audio streams straight from Spotify. Without being logged in you'll get a 30-second preview per track, which is plenty to know if it's for you; log in to Spotify in another tab first for full playback.<br><br><strong>Chords:</strong> a monospace line under a track shows its verse/chorus progression, sourced from published chord charts — click a chord to search it up, or use the Tutorial link below it for a full guitar tutorial of the song on YouTube. These are best-effort transcriptions from third-party chord/tab sites, not verified against the original recordings note-for-note.</div>
+    <div class="note"><strong>Playback:</strong> this page embeds Spotify's own player, so nothing is downloaded or rehosted — audio streams straight from Spotify. Without being logged in you'll get a 30-second preview per track, which is plenty to know if it's for you; log in to Spotify in another tab first for full playback.<br><br><strong>Chords:</strong> a monospace line under a track shows its verse/chorus progression, sourced from published chord charts — click a chord to search it up, or click "Chords"/"Verse"/"Chorus" to search YouTube for a full guitar tutorial of the song. These are best-effort transcriptions from third-party chord/tab sites, not verified against the original recordings note-for-note.</div>
   </div>
 </div>
 
@@ -606,29 +601,32 @@
     }).join(' – ');
   }
 
+  // The line's label (Chords / Verse / Chorus) links to a YouTube search
+  // for a full guitar tutorial of the song.
+  function tutorialUrl(idx){
+    const t = TRACKS[idx];
+    const query = `${t.song} ${t.artist} guitar tutorial`;
+    return `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
+  }
+
+  function chordLabel(idx, word){
+    return `<a class="chord-label" href="${tutorialUrl(idx)}" target="_blank" rel="noopener noreferrer" title="Search YouTube for a guitar tutorial of this song">${word}</a>`;
+  }
+
   function chordLine(idx){
     const c = CHORDS[idx];
     if(!c) return '';
     let text;
     if(c.one){
-      text = `Chords: ${linkifyChords(c.one)}`;
+      text = `${chordLabel(idx,'Chords')}: ${linkifyChords(c.one)}`;
     } else {
       const parts = [];
-      if(c.v) parts.push(`Verse: ${linkifyChords(c.v)}`);
-      if(c.c) parts.push(`Chorus: ${linkifyChords(c.c)}`);
+      if(c.v) parts.push(`${chordLabel(idx,'Verse')}: ${linkifyChords(c.v)}`);
+      if(c.c) parts.push(`${chordLabel(idx,'Chorus')}: ${linkifyChords(c.c)}`);
       text = parts.join(' &nbsp;·&nbsp; ');
     }
     if(c.note) text += ` <span class="chord-note">(${c.note})</span>`;
     return `<div class="chord-line">${text}</div>`;
-  }
-
-  // One link per track: search YouTube for a full-song guitar tutorial.
-  function tutorialLine(idx){
-    if(!CHORDS[idx]) return '';
-    const t = TRACKS[idx];
-    const query = `${t.song} ${t.artist} guitar tutorial`;
-    const url = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
-    return `<div class="tutorial-line"><a class="tutorial-link" href="${url}" target="_blank" rel="noopener noreferrer">Tutorial</a></div>`;
   }
 
   const listEl = document.getElementById('list');
@@ -701,7 +699,6 @@
           </div>
           <div class="source-line"><a class="src" href="${movieSearchUrl(t)}" target="_blank" rel="noopener noreferrer">${t.source}</a> · <span class="year">${t.year}</span> · ${t.media === 'tv' ? 'TV' : 'Film'}</div>
           ${chordLine(t.idx)}
-          ${tutorialLine(t.idx)}
         </div>
       </div>
     `).join('');
