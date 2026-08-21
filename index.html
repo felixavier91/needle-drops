@@ -235,11 +235,6 @@
     font-family:"IBM Plex Mono", monospace;
     font-size:12px;
   }
-  .note-line{
-    margin-top:4px;
-    font-size:12.5px;
-    color:var(--accent-soft);
-  }
   .chord-line{
     margin-top:5px;
     font-family:"IBM Plex Mono", monospace;
@@ -250,6 +245,28 @@
     font-family:"Work Sans", sans-serif;
     color:var(--text-dim);
     font-style:italic;
+  }
+  .chord-link{
+    color:inherit;
+    text-decoration:none;
+    border-bottom:1px dotted var(--text-dim);
+  }
+  .chord-link:hover{
+    color:var(--accent);
+    border-bottom-color:var(--accent);
+  }
+  .tutorial-line{
+    margin-top:5px;
+  }
+  .tutorial-link{
+    font-family:"IBM Plex Mono", monospace;
+    font-size:12px;
+    color:var(--accent-soft);
+    text-decoration:none;
+  }
+  .tutorial-link:hover{
+    color:var(--accent);
+    text-decoration:underline;
   }
   .empty{
     display:none;
@@ -322,7 +339,7 @@
       <div class="stat"><b>1967–2023</b><span>Span</span></div>
       <div class="stat"><b>100</b><span>With chords</span></div>
     </div>
-    <div class="note"><strong>Playback:</strong> this page embeds Spotify's own player, so nothing is downloaded or rehosted — audio streams straight from Spotify. Without being logged in you'll get a 30-second preview per track, which is plenty to know if it's for you; log in to Spotify in another tab first for full playback.<br><br><strong>Chords:</strong> a monospace line under a track shows its verse/chorus progression, sourced from published chord charts. These are best-effort transcriptions from third-party chord/tab sites, not verified against the original recordings note-for-note.</div>
+    <div class="note"><strong>Playback:</strong> this page embeds Spotify's own player, so nothing is downloaded or rehosted — audio streams straight from Spotify. Without being logged in you'll get a 30-second preview per track, which is plenty to know if it's for you; log in to Spotify in another tab first for full playback.<br><br><strong>Chords:</strong> a monospace line under a track shows its verse/chorus progression, sourced from published chord charts — click a chord to search it up, or use the Tutorial link below it for a full guitar tutorial of the song on YouTube. These are best-effort transcriptions from third-party chord/tab sites, not verified against the original recordings note-for-note.</div>
   </div>
 </div>
 
@@ -507,7 +524,7 @@
     42:{v:"F – Dm – Bb – C",c:"D – G – A"},
     43:{v:"Bm – A – D – G",c:"E – Esus4 – D – Dsus4"},
     44:{one:"D – G – A",note:"I–IV–V vamp throughout, no distinct verse/chorus; key of D"},
-    45:{one:"Bb – C7 – F7 – Cm7 (ballad) – A → Eb (operatic) – Eb – F7 – Bb7 (hard rock)",note:"six-section suite (ballad/opera/rock/coda), no conventional verse-chorus form"},
+    45:{one:"Bb – C7 – F7 – Cm7 – A – Eb – Eb – F7 – Bb7",note:"six-section suite — ballad in Bb, operatic bridge modulating to Eb, hard-rock coda; no conventional verse-chorus form"},
     46:{v:"D – G – Gm – D/F♯",c:"D – D7 – G – Em – G7"},
     47:{one:"Am – G – Am – C – F – C",note:"capo 6th fret; verses only, no distinct chorus"},
     48:{v:"E – E7 – A – D – G – C – Am",c:"D – G – Em – C – Am7 – D"},
@@ -564,20 +581,47 @@
     99:{v:"G – D – Am – C",c:"G5 – C5 – C5/C# – C5",note:"chorus uses power chords"}
   };
 
+  // Each chord in a progression links out to a Google search for that chord.
+  function cleanChordToken(tok){
+    return tok.replace(/\s*\(.*?\)\s*$/,'').trim();
+  }
+
+  function chordSearchUrl(token){
+    const cleaned = cleanChordToken(token).replace(/♯/g,'#').replace(/♭/g,'b');
+    return `https://www.google.com/search?tbm=isch&q=${encodeURIComponent(cleaned + ' guitar chord')}`;
+  }
+
+  function linkifyChords(str){
+    return str.split('–').map(tok=>{
+      const trimmed = tok.trim();
+      if(!trimmed) return trimmed;
+      return `<a class="chord-link" href="${chordSearchUrl(trimmed)}" target="_blank" rel="noopener noreferrer">${trimmed}</a>`;
+    }).join(' – ');
+  }
+
   function chordLine(idx){
     const c = CHORDS[idx];
     if(!c) return '';
     let text;
     if(c.one){
-      text = `Chords: ${c.one}`;
+      text = `Chords: ${linkifyChords(c.one)}`;
     } else {
       const parts = [];
-      if(c.v) parts.push(`Verse: ${c.v}`);
-      if(c.c) parts.push(`Chorus: ${c.c}`);
+      if(c.v) parts.push(`Verse: ${linkifyChords(c.v)}`);
+      if(c.c) parts.push(`Chorus: ${linkifyChords(c.c)}`);
       text = parts.join(' &nbsp;·&nbsp; ');
     }
     if(c.note) text += ` <span class="chord-note">(${c.note})</span>`;
     return `<div class="chord-line">${text}</div>`;
+  }
+
+  // One button per track: search YouTube for a full-song guitar tutorial.
+  function tutorialLine(idx){
+    if(!CHORDS[idx]) return '';
+    const t = TRACKS[idx];
+    const query = `${t.song} ${t.artist} guitar tutorial`;
+    const url = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
+    return `<div class="tutorial-line"><a class="tutorial-link" href="${url}" target="_blank" rel="noopener noreferrer">Tutorial</a></div>`;
   }
 
   const listEl = document.getElementById('list');
@@ -649,8 +693,8 @@
             <span class="artist">${t.artist}</span>
           </div>
           <div class="source-line"><span class="src">${t.source}</span> · <span class="year">${t.year}</span> · ${t.media === 'tv' ? 'TV' : 'Film'}</div>
-          <div class="note-line">${t.note}</div>
           ${chordLine(t.idx)}
+          ${tutorialLine(t.idx)}
         </div>
       </div>
     `).join('');
