@@ -262,6 +262,17 @@
     font-size:12.5px;
     color:var(--accent-soft);
   }
+  .chord-line{
+    margin-top:5px;
+    font-family:"IBM Plex Mono", monospace;
+    font-size:12px;
+    color:var(--text);
+  }
+  .chord-note{
+    font-family:"Work Sans", sans-serif;
+    color:var(--text-dim);
+    font-style:italic;
+  }
   .tag-pill{
     display:inline-block;
     margin-top:6px;
@@ -346,8 +357,9 @@
       <div class="stat"><b>21</b><span>From TV</span></div>
       <div class="stat"><b>1967–2023</b><span>Span</span></div>
       <div class="stat"><b>10</b><span>Moods</span></div>
+      <div class="stat"><b>41</b><span>With chords</span></div>
     </div>
-    <div class="note"><strong>Playback:</strong> this page embeds Spotify's own player, so nothing is downloaded or rehosted — audio streams straight from Spotify. Without being logged in you'll get a 30-second preview per track, which is plenty to know if it's for you; log in to Spotify in another tab first for full playback.</div>
+    <div class="note"><strong>Playback:</strong> this page embeds Spotify's own player, so nothing is downloaded or rehosted — audio streams straight from Spotify. Without being logged in you'll get a 30-second preview per track, which is plenty to know if it's for you; log in to Spotify in another tab first for full playback.<br><br><strong>Chords:</strong> a monospace line under a track shows its verse/chorus progression, sourced from published chord charts. Only 41 of 100 are filled in so far — the rest simply have no chord line yet, that's not a claim the chords don't exist.</div>
   </div>
 </div>
 
@@ -485,6 +497,69 @@
     ["All Star","Smash Mouth","Shrek",2001,"film","Animation","Opening swamp scene","3cfOd4CMv2snFaKAnMdnvK"]
   ].map(([song,artist,source,year,media,tag,note,spotifyId])=>({song,artist,source,year,media,tag,note,spotifyId}));
 
+  // Verse/chorus chord progressions, by TRACKS index. Sourced from published chord/tab
+  // charts (chords only, no lyrics). Not every track has been looked up yet — entries
+  // simply don't appear for the rest, rather than showing a "not found" placeholder.
+  const CHORDS = {
+    0:{v:"D – G7 – D",c:"A – C – G – D"},
+    1:{v:"G – F – D",c:"G – D – C – Em – F – D"},
+    2:{one:"E – F – A – B",note:"instrumental"},
+    3:{one:"Gm7 – Dm7"},
+    4:{one:"C – F – G7",note:"12-bar blues form"},
+    5:{v:"Gm – C – F – Eb",c:"Gm – C – F – Gm"},
+    6:{one:"E – A – B",note:"verse/chorus not clearly distinguished in available charts"},
+    25:{one:"G – Am – Em"},
+    26:{one:"D – G – Em – G"},
+    27:{one:"Ab – Fm – Cm – Gm"},
+    28:{one:"Em – D – C",note:"simplified common version"},
+    29:{v:"G – Bm – Em – D",c:"G – Bm – Em – D",note:"simplified versions use C – Em – Am – G"},
+    30:{v:"G – D – Em – F – C – D",note:"no distinct chorus — builds into a long instrumental outro/solo"},
+    31:{one:"G – C – D",note:"capo 1st fret; verse/chorus not clearly differentiated"},
+    32:{one:"C – Am – F – G"},
+    33:{one:"G – Em – C – D",note:"folk structure, no separate chorus"},
+    34:{v:"Am – F – G",c:"F – C – G"},
+    50:{one:"A – G – D – E",note:"riff-driven, same chords throughout"},
+    51:{v:"C – F/C – G – Em7 – Am7 – D7",c:"F – C – Dm – Em"},
+    52:{one:"C – C/B – Am – G – F – Fsus4 – F",note:"through-composed, no distinct chorus"},
+    53:{v:"A – E",c:"G – D – E – A"},
+    54:{one:"Am – D – G – C",note:"capo 1st fret"},
+    55:{one:"C – G/B – Am7 – G – Fmaj9",note:"no distinct chorus"},
+    56:{v:"Am – F – C – E",c:"Am – C – F"},
+    57:{v:"G – Am7",c:"C – G – Am7",note:"capo 7th fret"},
+    58:{one:"Am – C – F – G",note:"repeats through verse and chorus"},
+    59:{one:"D – Dmaj7 – A – F#m – G – Bm – Gmaj7",note:"key of D"},
+    60:{one:"Ab – Db – Eb"},
+    61:{one:"Am7 – D – C – E – Am – F",note:"capo 3rd fret, largely instrumental"},
+    62:{v:"Em – G – D – A",c:"Em – A"},
+    75:{v:"D – A – Bm – G – A – D",c:"A – D – A – Bm – Asus4"},
+    76:{one:"A – B7 – G – D – F – C – E7",note:"no clean verse/chorus split; key of A"},
+    77:{v:"Cm – Ab – Bb – Gm – Am",c:"Abmaj7 – Bb – Cm"},
+    78:{one:"D – G – A",note:"F and B7 appear in places; used throughout"},
+    79:{one:"E5 – D5 – C♯5 – C – Em (×4) – B5 – E5 – Em",note:"instrumental/riff-driven, no clear verse/chorus"},
+    80:{one:"E – B – C♯m – A",note:"same progression through verse and chorus"},
+    81:{one:"Fm – Bb – Fm – Bb – Ab",note:"key of F minor"},
+    82:{v:"Am – C – F – F"},
+    83:{one:"A – E/G♯ – D – A",note:"same progression throughout verse and chorus"},
+    84:{v:"A – E – F#m – D",c:"A – Emaj7 – F#m – Dmaj7",note:"B9 appears occasionally"},
+    85:{one:"E – E – Em – Bm"}
+  };
+
+  function chordLine(idx){
+    const c = CHORDS[idx];
+    if(!c) return '';
+    let text;
+    if(c.one){
+      text = `Chords: ${c.one}`;
+    } else {
+      const parts = [];
+      if(c.v) parts.push(`Verse: ${c.v}`);
+      if(c.c) parts.push(`Chorus: ${c.c}`);
+      text = parts.join(' &nbsp;·&nbsp; ');
+    }
+    if(c.note) text += ` <span class="chord-note">(${c.note})</span>`;
+    return `<div class="chord-line">${text}</div>`;
+  }
+
   const listEl = document.getElementById('list');
   const chipsEl = document.getElementById('chips');
   const searchEl = document.getElementById('search');
@@ -573,6 +648,7 @@
           </div>
           <div class="source-line"><span class="src">${t.source}</span> · <span class="year">${t.year}</span> · ${t.media === 'tv' ? 'TV' : 'Film'}</div>
           <div class="note-line">${t.note}</div>
+          ${chordLine(t.idx)}
           <span class="tag-pill">${t.tag}</span>
         </div>
       </div>
