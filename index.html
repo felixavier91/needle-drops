@@ -633,7 +633,8 @@
         const matchesTag = activeTag === 'All' || t.tag === activeTag;
         const matchesQ = !q || [t.song,t.artist,t.source].some(f=>f.toLowerCase().includes(q));
         return matchesTag && matchesQ;
-      });
+      })
+      .sort((a,b)=> b.year - a.year);
 
     countEl.textContent = `${filtered.length} shown`;
     emptyEl.style.display = filtered.length ? 'none' : 'block';
