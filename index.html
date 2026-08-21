@@ -257,18 +257,15 @@
     border-bottom-color:var(--accent);
   }
   .tutorial-line{
-    margin-top:5px;
+    margin-top:6px;
   }
   .tutorial-link{
-    font-family:"IBM Plex Mono", monospace;
-    font-size:12px;
-    color:var(--text-dim);
-    text-decoration:none;
+    display:inline-flex;
+    align-items:center;
+    opacity:0.8;
   }
-  .tutorial-link:hover{
-    color:var(--accent);
-    text-decoration:underline;
-  }
+  .tutorial-link:hover{opacity:1;}
+  .tutorial-link svg{display:block;}
   .empty{
     display:none;
     padding:60px 4px;
@@ -340,7 +337,7 @@
       <div class="stat"><b>1967–2023</b><span>Span</span></div>
       <div class="stat"><b>100</b><span>With chords</span></div>
     </div>
-    <div class="note"><strong>Playback:</strong> this page embeds Spotify's own player, so nothing is downloaded or rehosted — audio streams straight from Spotify. Without being logged in you'll get a 30-second preview per track, which is plenty to know if it's for you; log in to Spotify in another tab first for full playback.<br><br><strong>Chords:</strong> a monospace line under a track shows its verse/chorus progression, sourced from published chord charts — click a chord to search it up, or use the Tutorial link below it for a full guitar tutorial of the song on YouTube. These are best-effort transcriptions from third-party chord/tab sites, not verified against the original recordings note-for-note.</div>
+    <div class="note"><strong>Playback:</strong> this page embeds Spotify's own player, so nothing is downloaded or rehosted — audio streams straight from Spotify. Without being logged in you'll get a 30-second preview per track, which is plenty to know if it's for you; log in to Spotify in another tab first for full playback.<br><br><strong>Chords:</strong> a monospace line under a track shows its verse/chorus progression, sourced from published chord charts — click a chord to search it up, or use the YouTube icon below it for a full guitar tutorial of the song. These are best-effort transcriptions from third-party chord/tab sites, not verified against the original recordings note-for-note.</div>
   </div>
 </div>
 
@@ -627,7 +624,8 @@
     const t = TRACKS[idx];
     const query = `${t.song} ${t.artist} guitar tutorial`;
     const url = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
-    return `<div class="tutorial-line"><a class="tutorial-link" href="${url}" target="_blank" rel="noopener noreferrer">🎓 Tutorial</a></div>`;
+    const icon = `<svg viewBox="0 0 24 17" width="20" height="14" aria-hidden="true"><rect x="0" y="0" width="24" height="17" rx="4" fill="#FF0000"/><polygon points="9.5,4.5 9.5,12.5 16,8.5" fill="#fff"/></svg>`;
+    return `<div class="tutorial-line"><a class="tutorial-link" href="${url}" target="_blank" rel="noopener noreferrer" title="Search YouTube for a guitar tutorial of this song" aria-label="Search YouTube for a guitar tutorial of this song">${icon}</a></div>`;
   }
 
   const listEl = document.getElementById('list');
