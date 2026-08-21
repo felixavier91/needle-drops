@@ -256,6 +256,19 @@
     color:var(--accent);
     border-bottom-color:var(--accent);
   }
+  .tutorial-line{
+    margin-top:5px;
+  }
+  .tutorial-link{
+    font-family:"IBM Plex Mono", monospace;
+    font-size:12px;
+    color:var(--text-dim);
+    text-decoration:none;
+  }
+  .tutorial-link:hover{
+    color:var(--accent);
+    text-decoration:underline;
+  }
   .empty{
     display:none;
     padding:60px 4px;
@@ -595,25 +608,26 @@
   function chordLine(idx){
     const c = CHORDS[idx];
     if(!c) return '';
-    const parts = [];
+    let text;
     if(c.one){
-      parts.push(`Chords: ${linkifyChords(c.one)}`);
+      text = `Chords: ${linkifyChords(c.one)}`;
     } else {
+      const parts = [];
       if(c.v) parts.push(`Verse: ${linkifyChords(c.v)}`);
       if(c.c) parts.push(`Chorus: ${linkifyChords(c.c)}`);
+      text = parts.join(' &nbsp;·&nbsp; ');
     }
-    parts.push(tutorialLink(idx));
-    let text = parts.join(' &nbsp;·&nbsp; ');
     if(c.note) text += ` <span class="chord-note">(${c.note})</span>`;
     return `<div class="chord-line">${text}</div>`;
   }
 
-  // Search YouTube for a full-song guitar tutorial.
-  function tutorialLink(idx){
+  // One link per track: search YouTube for a full-song guitar tutorial.
+  function tutorialLine(idx){
+    if(!CHORDS[idx]) return '';
     const t = TRACKS[idx];
     const query = `${t.song} ${t.artist} guitar tutorial`;
     const url = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
-    return `<a class="chord-link" href="${url}" target="_blank" rel="noopener noreferrer">Tutorial</a>`;
+    return `<div class="tutorial-line"><a class="tutorial-link" href="${url}" target="_blank" rel="noopener noreferrer">🎓 Tutorial</a></div>`;
   }
 
   const listEl = document.getElementById('list');
@@ -686,6 +700,7 @@
           </div>
           <div class="source-line"><a class="src" href="${movieSearchUrl(t)}" target="_blank" rel="noopener noreferrer">${t.source}</a> · <span class="year">${t.year}</span> · ${t.media === 'tv' ? 'TV' : 'Film'}</div>
           ${chordLine(t.idx)}
+          ${tutorialLine(t.idx)}
         </div>
       </div>
     `).join('');
