@@ -326,15 +326,15 @@
 
 <div class="hero">
   <div class="hero-inner">
-    <p class="eyebrow">A soundtrack-scouting list · 197 tracks</p>
+    <p class="eyebrow" id="eyebrow">A soundtrack-scouting list</p>
     <h1>Needle&nbsp;Drops</h1>
     <p class="lede">A "needle drop" is film-editor slang for dropping an <strong>existing recording</strong> onto a scene — as opposed to a composer scoring one from scratch. This is a growing list of needle drops (plus a few famous TV title themes) picked because the song is worth knowing on its own, independent of the scene it's attached to. <strong>Click any title to play it right here.</strong></p>
     <div class="stats">
-      <div class="stat"><b>197</b><span>Tracks</span></div>
-      <div class="stat"><b>161</b><span>From film</span></div>
-      <div class="stat"><b>36</b><span>From TV</span></div>
-      <div class="stat"><b>1935–2023</b><span>Span</span></div>
-      <div class="stat"><b>197</b><span>With chords</span></div>
+      <div class="stat"><b id="statTracks"></b><span>Tracks</span></div>
+      <div class="stat"><b id="statFilm"></b><span>From film</span></div>
+      <div class="stat"><b id="statTV"></b><span>From TV</span></div>
+      <div class="stat"><b id="statSpan"></b><span>Span</span></div>
+      <div class="stat"><b id="statChords"></b><span>With chords</span></div>
     </div>
     <div class="note"><strong>Playback:</strong> this page embeds Spotify's own player, so nothing is downloaded or rehosted — audio streams straight from Spotify. Without being logged in you'll get a 30-second preview per track, which is plenty to know if it's for you; log in to Spotify in another tab first for full playback.<br><br><strong>Chords:</strong> a monospace line under a track shows its verse/chorus progression, sourced from published chord charts — click a chord to search it up, or click "Chords"/"Verse"/"Chorus" to search YouTube for a full guitar tutorial of the song. These are best-effort transcriptions from third-party chord/tab sites, not verified against the original recordings note-for-note.</div>
   </div>
@@ -1098,6 +1098,24 @@
     });
   }
 
+  function renderStats(){
+    const total = TRACKS.length;
+    const filmCount = TRACKS.filter(t=>t.media==='film').length;
+    const tvCount = TRACKS.filter(t=>t.media==='tv').length;
+    const years = TRACKS.map(t=>t.year);
+    const minYear = Math.min(...years);
+    const maxYear = Math.max(...years);
+    const chordsCount = TRACKS.reduce((n,_,idx)=> n + (CHORDS[idx] ? 1 : 0), 0);
+
+    document.getElementById('eyebrow').textContent = `A soundtrack-scouting list · ${total} tracks`;
+    document.getElementById('statTracks').textContent = total;
+    document.getElementById('statFilm').textContent = filmCount;
+    document.getElementById('statTV').textContent = tvCount;
+    document.getElementById('statSpan').textContent = `${minYear}–${maxYear}`;
+    document.getElementById('statChords').textContent = chordsCount;
+  }
+
+  renderStats();
   render();
   searchEl.addEventListener('input', render);
 </script>
