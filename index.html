@@ -230,7 +230,8 @@
     font-size:13.5px;
     color:var(--text-dim);
   }
-  .source-line .src{font-style:italic;color:var(--text);}
+  .source-line .src{font-style:italic;color:var(--text);text-decoration:none;}
+  .source-line .src:hover{color:var(--accent);}
   .source-line .year{
     font-family:"IBM Plex Mono", monospace;
     font-size:12px;
@@ -581,6 +582,11 @@
     99:{v:"G – D – Am – C",c:"G5 – C5 – C5/C# – C5",note:"chorus uses power chords"}
   };
 
+  function movieSearchUrl(t){
+    const kind = t.media === 'tv' ? 'TV show' : 'movie';
+    return `https://www.google.com/search?q=${encodeURIComponent(t.source + ' ' + kind)}`;
+  }
+
   // Each chord in a progression links out to a Google search for that chord.
   function cleanChordToken(tok){
     return tok.replace(/\s*\(.*?\)\s*$/,'').trim();
@@ -692,7 +698,7 @@
             <button class="song-btn" data-idx="${t.idx}" type="button">${t.song}</button>
             <span class="artist">${t.artist}</span>
           </div>
-          <div class="source-line"><span class="src">${t.source}</span> · <span class="year">${t.year}</span> · ${t.media === 'tv' ? 'TV' : 'Film'}</div>
+          <div class="source-line"><a class="src" href="${movieSearchUrl(t)}" target="_blank" rel="noopener noreferrer">${t.source}</a> · <span class="year">${t.year}</span> · ${t.media === 'tv' ? 'TV' : 'Film'}</div>
           ${chordLine(t.idx)}
           ${tutorialLine(t.idx)}
         </div>
