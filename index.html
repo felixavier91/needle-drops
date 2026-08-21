@@ -1,0 +1,593 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Needle Drops</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Work+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#ece3d0;
+    --surface:#ffffff;
+    --surface-2:#f7f1e4;
+    --text:#241c12;
+    --text-dim:#6b5d47;
+    --accent:#a8681c;
+    --accent-soft:#c99a52;
+    --border:#d9cbab;
+    --playing:#3f7a4d;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#120f0c;
+      --surface:#1c1712;
+      --surface-2:#241d17;
+      --text:#f0e6d6;
+      --text-dim:#a99a86;
+      --accent:#e8a33d;
+      --accent-soft:#8a6a2e;
+      --border:#33291f;
+      --playing:#6fbf7f;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#120f0c;
+    --surface:#1c1712;
+    --surface-2:#241d17;
+    --text:#f0e6d6;
+    --text-dim:#a99a86;
+    --accent:#e8a33d;
+    --accent-soft:#8a6a2e;
+    --border:#33291f;
+    --playing:#6fbf7f;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:"Work Sans", ui-sans-serif, system-ui, sans-serif;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    padding-bottom:104px; /* room for fixed player bar */
+  }
+  a{color:inherit;}
+
+  .wrap{max-width:920px;margin:0 auto;padding:0 20px 60px;}
+
+  /* ---------- Hero ---------- */
+  .hero{
+    position:relative;
+    padding:64px 20px 40px;
+    border-bottom:1px solid var(--border);
+    background:
+      repeating-linear-gradient(90deg, var(--border) 0 1px, transparent 1px 46px);
+    background-position:0 0;
+    background-size:100% 100%;
+    overflow:hidden;
+  }
+  .hero::before, .hero::after{
+    content:"";
+    position:absolute;
+    left:0; right:0; height:14px;
+    background-image: radial-gradient(circle, var(--border) 2.5px, transparent 2.6px);
+    background-size:28px 28px;
+    background-position: 14px center;
+    opacity:.7;
+  }
+  .hero::before{ top:0; }
+  .hero::after{ bottom:0; }
+  .hero-inner{max-width:920px;margin:0 auto;position:relative;}
+  .eyebrow{
+    font-family:"IBM Plex Mono", ui-monospace, monospace;
+    font-size:12px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--accent);
+    margin:0 0 14px;
+  }
+  h1{
+    font-family:"Bebas Neue", ui-sans-serif, sans-serif;
+    font-weight:400;
+    font-size:clamp(56px, 11vw, 108px);
+    letter-spacing:.01em;
+    line-height:.92;
+    margin:0 0 18px;
+    text-wrap:balance;
+    color:var(--text);
+  }
+  .hero p.lede{
+    max-width:60ch;
+    font-size:17px;
+    color:var(--text-dim);
+    margin:0 0 28px;
+  }
+  .hero p.lede strong{color:var(--text);font-weight:600;}
+
+  .stats{
+    display:flex;
+    flex-wrap:wrap;
+    gap:28px;
+    margin-top:8px;
+  }
+  .stat{min-width:88px;}
+  .stat b{
+    display:block;
+    font-family:"IBM Plex Mono", monospace;
+    font-variant-numeric:tabular-nums;
+    font-size:26px;
+    color:var(--accent);
+  }
+  .stat span{
+    font-size:11px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--text-dim);
+  }
+
+  .note{
+    margin-top:30px;
+    padding:14px 16px;
+    background:var(--surface-2);
+    border:1px solid var(--border);
+    border-radius:6px;
+    font-size:13.5px;
+    color:var(--text-dim);
+    max-width:64ch;
+  }
+  .note strong{color:var(--text);}
+
+  /* ---------- Controls ---------- */
+  .controls{
+    position:sticky;
+    top:0;
+    z-index:5;
+    background:var(--bg);
+    padding:16px 20px;
+    border-bottom:1px solid var(--border);
+  }
+  .controls-inner{max-width:920px;margin:0 auto;}
+  .search-row{display:flex;gap:10px;align-items:center;margin-bottom:12px;}
+  .search-row input[type="search"]{
+    flex:1;
+    background:var(--surface);
+    border:1px solid var(--border);
+    color:var(--text);
+    padding:10px 14px;
+    border-radius:6px;
+    font-family:inherit;
+    font-size:14px;
+  }
+  .search-row input[type="search"]:focus{
+    outline:2px solid var(--accent);
+    outline-offset:1px;
+  }
+  .count{
+    font-family:"IBM Plex Mono", monospace;
+    font-size:12.5px;
+    color:var(--text-dim);
+    white-space:nowrap;
+  }
+  .chips{display:flex;flex-wrap:wrap;gap:8px;}
+  .chip{
+    font-family:"IBM Plex Mono", monospace;
+    font-size:12px;
+    letter-spacing:.01em;
+    padding:6px 11px;
+    border-radius:999px;
+    border:1px solid var(--border);
+    background:var(--surface);
+    color:var(--text-dim);
+    cursor:pointer;
+    user-select:none;
+  }
+  .chip:hover{color:var(--text);border-color:var(--accent-soft);}
+  .chip.active{
+    background:var(--accent);
+    border-color:var(--accent);
+    color:var(--bg);
+    font-weight:500;
+  }
+  .chip:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+
+  /* ---------- List ---------- */
+  .list{margin-top:8px;}
+  .row{
+    display:grid;
+    grid-template-columns:40px 1fr;
+    gap:4px 16px;
+    padding:16px 4px;
+    border-bottom:1px solid var(--border);
+    align-items:start;
+  }
+  .row:hover{background:var(--surface-2);}
+  .row.playing{background:var(--surface-2);}
+  .row.playing .idx{color:var(--playing);}
+  .idx{
+    font-family:"IBM Plex Mono", monospace;
+    font-variant-numeric:tabular-nums;
+    font-size:13px;
+    color:var(--text-dim);
+    padding-top:3px;
+  }
+  .meta{min-width:0;}
+  .title-line{
+    display:flex;
+    align-items:baseline;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+  .song-btn{
+    font-family:inherit;
+    font-size:16.5px;
+    font-weight:600;
+    color:var(--text);
+    background:none;
+    border:none;
+    padding:0;
+    margin:0;
+    cursor:pointer;
+    text-align:left;
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+  }
+  .song-btn::before{
+    content:"▶";
+    font-size:10px;
+    color:var(--accent);
+    transition:transform .12s ease;
+  }
+  .song-btn:hover{color:var(--accent);}
+  .song-btn:hover::before{transform:scale(1.25);}
+  .row.playing .song-btn{color:var(--playing);}
+  .row.playing .song-btn::before{content:"♪";color:var(--playing);}
+  .song-btn:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:3px;}
+  .artist{font-size:14.5px;color:var(--text-dim);}
+  .source-line{
+    margin-top:3px;
+    font-size:13.5px;
+    color:var(--text-dim);
+  }
+  .source-line .src{font-style:italic;color:var(--text);}
+  .source-line .year{
+    font-family:"IBM Plex Mono", monospace;
+    font-size:12px;
+  }
+  .note-line{
+    margin-top:4px;
+    font-size:12.5px;
+    color:var(--accent-soft);
+  }
+  .tag-pill{
+    display:inline-block;
+    margin-top:6px;
+    font-family:"IBM Plex Mono", monospace;
+    font-size:10.5px;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    padding:2px 8px;
+    border-radius:999px;
+    background:var(--surface-2);
+    border:1px solid var(--border);
+    color:var(--text-dim);
+  }
+
+  .empty{
+    display:none;
+    padding:60px 4px;
+    text-align:center;
+    color:var(--text-dim);
+    font-size:14px;
+  }
+
+  footer{
+    max-width:920px;margin:0 auto;padding:40px 20px 0;
+    font-size:12.5px;color:var(--text-dim);
+    border-top:1px solid var(--border);
+    margin-top:20px;
+    padding-top:24px;
+  }
+
+  /* ---------- Player bar ---------- */
+  .player-bar{
+    position:fixed;
+    left:0; right:0; bottom:0;
+    z-index:20;
+    background:var(--surface);
+    border-top:1px solid var(--border);
+    box-shadow:0 -6px 20px rgba(0,0,0,.12);
+    display:flex;
+    align-items:center;
+    gap:16px;
+    padding:10px 20px;
+  }
+  .player-bar-inner{
+    max-width:920px;
+    margin:0 auto;
+    width:100%;
+    display:flex;
+    align-items:center;
+    gap:16px;
+  }
+  .player-info{flex:1;min-width:0;}
+  .player-empty{font-size:13px;color:var(--text-dim);font-family:"IBM Plex Mono",monospace;}
+  .player-track{display:none;}
+  .player-track.active{display:block;}
+  .player-song{font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .player-meta{font-size:12.5px;color:var(--text-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .player-embed{width:280px;flex-shrink:0;}
+  .player-embed iframe{border-radius:8px;display:block;}
+
+  @media (max-width:640px){
+    .player-bar-inner{flex-direction:column;align-items:stretch;gap:8px;}
+    .player-embed{width:100%;}
+    h1{font-size:clamp(44px,16vw,72px);}
+  }
+
+  @media (prefers-reduced-motion:no-preference){
+    .chip, .song-btn, .row{transition:background-color .12s ease, color .12s ease, border-color .12s ease;}
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-inner">
+    <p class="eyebrow">A soundtrack-scouting list · 100 tracks</p>
+    <h1>Needle&nbsp;Drops</h1>
+    <p class="lede">A "needle drop" is film-editor slang for dropping an <strong>existing recording</strong> onto a scene — as opposed to a composer scoring one from scratch. This is a list of 100 needle drops (plus a few famous TV title themes) picked because the song is worth knowing on its own, independent of the scene it's attached to. <strong>Click any title to play it right here.</strong></p>
+    <div class="stats">
+      <div class="stat"><b>100</b><span>Tracks</span></div>
+      <div class="stat"><b>79</b><span>From film</span></div>
+      <div class="stat"><b>21</b><span>From TV</span></div>
+      <div class="stat"><b>1967–2023</b><span>Span</span></div>
+      <div class="stat"><b>10</b><span>Moods</span></div>
+    </div>
+    <div class="note"><strong>Playback:</strong> this page embeds Spotify's own player, so nothing is downloaded or rehosted — audio streams straight from Spotify. Without being logged in you'll get a 30-second preview per track, which is plenty to know if it's for you; log in to Spotify in another tab first for full playback.</div>
+  </div>
+</div>
+
+<div class="controls">
+  <div class="controls-inner">
+    <div class="search-row">
+      <input type="search" id="search" placeholder="Search song, artist, or movie/show…" autocomplete="off">
+      <span class="count" id="count">100 shown</span>
+    </div>
+    <div class="chips" id="chips"></div>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="list" id="list"></div>
+  <p class="empty" id="empty">Nothing matches that search. Try a different word, or clear the filter.</p>
+  <footer>Scene descriptions are from memory and meant as a quick cue, not a verified script reference. Spotify track matches were verified individually against Spotify's own catalog, favoring the exact recording/cover credited for each scene where more than one version exists.</footer>
+</div>
+
+<div class="player-bar">
+  <div class="player-bar-inner">
+    <div class="player-info">
+      <div class="player-empty" id="playerEmpty">Click any title below to start listening.</div>
+      <div class="player-track" id="playerTrack">
+        <div class="player-song" id="pSong"></div>
+        <div class="player-meta" id="pMeta"></div>
+      </div>
+    </div>
+    <div class="player-embed" id="spotify-embed"></div>
+  </div>
+</div>
+
+<script>
+  // [song, artist, source, year, media, tag, note, spotifyTrackId]
+  const TRACKS = [
+    ["Stuck in the Middle with You","Stealers Wheel","Reservoir Dogs",1992,"film","Crime & Cool","Mr. Blonde's razor dance","1Fz8jqYQGBUXWQ1AEQEKr2"],
+    ["Little Green Bag","George Baker Selection","Reservoir Dogs",1992,"film","Crime & Cool","Opening-credits strut","2r9qzaBjsU7j0b1rczmAh8"],
+    ["Misirlou","Dick Dale","Pulp Fiction",1994,"film","Crime & Cool","Title-card surf riff","01CW27oHl5mEVdrsmd92To"],
+    ["Jungle Boogie","Kool & the Gang","Pulp Fiction",1994,"film","Crime & Cool","Diner opening","0Y1zjQP3AJzCnrnvofeHJJ"],
+    ["You Never Can Tell","Chuck Berry","Pulp Fiction",1994,"film","Crime & Cool","Jack Rabbit Slim's twist contest","5NtjjWxN2mTLtORfqEjJZ0"],
+    ["Girl, You'll Be a Woman Soon","Urge Overkill","Pulp Fiction",1994,"film","Crime & Cool","Mia's overdose scene","5u6Woby9oKAF8LhhuxykH1"],
+    ["Son of a Preacher Man","Dusty Springfield","Pulp Fiction",1994,"film","Crime & Cool","Mia waiting at home","7o6OVQ6dA2TSKrn0VNNKm6"],
+    ["Bang Bang (My Baby Shot Me Down)","Nancy Sinatra","Kill Bill: Vol. 1",2003,"film","Crime & Cool","Opening titles","4JLcAU2xY90qTkTSNM1lUa"],
+    ["Battle Without Honor or Humanity","Tomoyasu Hotei","Kill Bill: Vol. 1",2003,"film","Crime & Cool","House of Blue Leaves fight","6Q32Vkucx2qeuVyBd3NiFZ"],
+    ["Cat People (Putting Out Fire)","David Bowie","Inglourious Basterds",2009,"film","Crime & Cool","Shosanna gets ready","25ceFvWSaI3zoy9hhNYDqu"],
+    ["Freedom","Anthony Hamilton & Elayna Boynton","Django Unchained",2012,"film","Crime & Cool","Mandingo travel montage","3Mo3oLTEgfFXocDHx6IS2V"],
+    ["Layla (Piano Exit)","Derek and the Dominos","Goodfellas",1990,"film","Crime & Cool","Bodies-in-the-trunk montage","6D9eBHRFy1eDaRb8stZJHo"],
+    ["Gimme Shelter","The Rolling Stones","Goodfellas",1990,"film","Crime & Cool","Henry Hill introduced","14uQWXYRflpBP8J6olZ8mH"],
+    ["Rags to Riches","Tony Bennett","Goodfellas",1990,"film","Crime & Cool","Copacabana tracking shot","3dezm62XnLPbcyjMImyccG"],
+    ["Jump into the Fire","Harry Nilsson","Goodfellas",1990,"film","Crime & Cool","Cocaine-paranoia montage","5Wk1Q0amihLTHfspJiUWBL"],
+    ["Sunshine of Your Love","Cream","Goodfellas",1990,"film","Crime & Cool","Cocaine-paranoia montage","2BcvvHttiZRvguFM4hR398"],
+    ["Mannish Boy","Muddy Waters","Goodfellas",1990,"film","Crime & Cool","Cocaine-paranoia montage","1LeHqu4aekTnpaaJRgvorM"],
+    ["Hotel California (cover)","Gipsy Kings","The Big Lebowski",1998,"film","Crime & Cool","Jesus Quintana's lane","24kgXrvlcGk0qputrpWvzj"],
+    ["The Man in Me","Bob Dylan","The Big Lebowski",1998,"film","Crime & Cool","Dream bowling ballet","7xRemq7GLu0Tbqe9OckG87"],
+    ["Hip to Be Square","Huey Lewis and the News","American Psycho",2000,"film","Crime & Cool","Patrick Bateman's monologue","4vS047dAeYGbZzqvqLyBDX"],
+    ["Bellbottoms","The Jon Spencer Blues Explosion","Baby Driver",2017,"film","Action & Superhero","Opening bank-heist drive","79PxtVncdjRkwrTcQuccvu"],
+    ["Hooked on a Feeling","Blue Swede","Guardians of the Galaxy",2014,"film","Action & Superhero","Peter Quill's dance-off","6Ac4NVYYl2U73QiTt11ZKd"],
+    ["Come and Get Your Love","Redbone","Guardians of the Galaxy",2014,"film","Action & Superhero","Opening walk on Morag","5m0X9DAetZow8Xgp82Ap6X"],
+    ["Cherry Bomb","The Runaways","Guardians of the Galaxy Vol. 2",2017,"film","Action & Superhero","Baby Groot dance intro","7cdnq45E9aP2XDStHg5vd7"],
+    ["Mr. Blue Sky","Electric Light Orchestra","Guardians of the Galaxy Vol. 2",2017,"film","Action & Superhero","Opening space chase","2RlgNHKcydI9sayD2Df2xp"],
+    ["Dog Days Are Over","Florence + the Machine","Guardians of the Galaxy Vol. 3",2023,"film","Action & Superhero","Rocket's backstory montage","1YLJVmuzeM2YSUkCCaTNUB"],
+    ["Sunflower","Post Malone & Swae Lee","Spider-Man: Into the Spider-Verse",2018,"film","Action & Superhero","End-credits anthem","0FO30jIftsHXv8S3kMCbaN"],
+    ["All the Stars","Kendrick Lamar & SZA","Black Panther",2018,"film","Action & Superhero","End credits","3GCdLUSnKSMJhs4Tj6CV3s"],
+    ["Danger Zone","Kenny Loggins","Top Gun",1986,"film","Action & Superhero","Opening carrier launch","0QzKvzxU2InWJG5cR2SO82"],
+    ["Take My Breath Away","Berlin","Top Gun",1986,"film","Action & Superhero","Love theme","50jEs9EZZgXJ1oDZVAv7Wp"],
+    ["Free Bird","Lynyrd Skynyrd","Kingsman: The Secret Service",2014,"film","Action & Superhero","Church massacre","5EWPGh7jbTNO2wakv8LjUI"],
+    ["Angel of the Morning","Juice Newton","Deadpool",2016,"film","Action & Superhero","Opening freeway credits","5ljI2SozoRAFmLZp1N7sB9"],
+    ["The Man Comes Around","Johnny Cash","Logan",2017,"film","Action & Superhero","Trailer & closing scenes","6U6hB7DnQ19oE65gF5EqU2"],
+    ["The Times They Are a-Changin'","Bob Dylan","Watchmen",2009,"film","Action & Superhero","Opening title montage","2HQWTyTz7VRJ8g0wbXcf7A"],
+    ["Eye of the Tiger","Survivor","Rocky III",1982,"film","80s Teen & Montage","Training montage","2lNtnAXlc7b732r9Ml0wGS"],
+    ["You're the Best","Joe Esposito","The Karate Kid",1984,"film","80s Teen & Montage","Tournament montage","4zXa17K83Pp6N2yXdVc2sv"],
+    ["Old Time Rock and Roll","Bob Seger","Risky Business",1983,"film","80s Teen & Montage","Sock-slide living room dance","5EOoMWIB9iK4ZpcSex9Ec7"],
+    ["Footloose","Kenny Loggins","Footloose",1984,"film","80s Teen & Montage","Warehouse dance-out","5XCdcyhGeBoBpKYd3ujkjO"],
+    ["Flashdance... What a Feeling","Irene Cara","Flashdance",1983,"film","80s Teen & Montage","Final audition","5EkQYd9xvBrNchHDaDSKa5"],
+    ["(I've Had) The Time of My Life","Bill Medley & Jennifer Warnes","Dirty Dancing",1987,"film","80s Teen & Montage","Final lift","5UqqOfFa9DYXALpCCF8VwB"],
+    ["St. Elmo's Fire (Man in Motion)","John Parr","St. Elmo's Fire",1985,"film","80s Teen & Montage","End credits","1A2PWRltFrX8iB8IP3CUgo"],
+    ["Don't You (Forget About Me)","Simple Minds","The Breakfast Club",1985,"film","80s Teen & Montage","Closing fist-pump freeze frame","3fH4KjXFYMmljxrcGrbPj9"],
+    ["If You Leave","Orchestral Manoeuvres in the Dark","Pretty in Pink",1986,"film","80s Teen & Montage","Prom finale","1mqFyupWZazWni8u373fJc"],
+    ["In Your Eyes","Peter Gabriel","Say Anything...",1989,"film","80s Teen & Montage","Boombox outside the window","4qN7nSAVTjPfOOz0wkRQpM"],
+    ["Twist and Shout","The Beatles","Ferris Bueller's Day Off",1986,"film","80s Teen & Montage","Parade float lip-sync","4Z1fbYp0HuxLBje4MOZcSD"],
+    ["Bohemian Rhapsody","Queen","Wayne's World",1992,"film","80s Teen & Montage","Car headbang singalong","7tFiyTwD0nx5a1eklYtX2J"],
+    ["Up Where We Belong","Joe Cocker & Jennifer Warnes","An Officer and a Gentleman",1982,"film","80s Teen & Montage","Factory-floor finale","3690IFzTbQka9unRN9P2lc"],
+    ["The Sound of Silence","Simon & Garfunkel","The Graduate",1967,"film","Classic & Counterculture","Opening airport walk","7eQUgarLukHLkZaO1mxtab"],
+    ["Mrs. Robinson","Simon & Garfunkel","The Graduate",1967,"film","Classic & Counterculture","Driving montage","0fvESDxzZ6KUnfXukdqdIl"],
+    ["Born to Be Wild","Steppenwolf","Easy Rider",1969,"film","Classic & Counterculture","Opening motorcycle ride","63OFKbMaZSDZ4wtesuuq6f"],
+    ["Fortunate Son","Creedence Clearwater Revival","Forrest Gump",1994,"film","Classic & Counterculture","Vietnam sequence","3C5KHfRnshp5B8mNjhsDBG"],
+    ["Tiny Dancer","Elton John","Almost Famous",2000,"film","Indie & Auteur","Tour-bus singalong","6fKBv1AMKwLbiEghJMOmTM"],
+    ["America","Simon & Garfunkel","Almost Famous",2000,"film","Indie & Auteur","Bus-station wander","6dfhF1BDGmhM69fnCb6wSC"],
+    ["Lust for Life","Iggy Pop","Trainspotting",1996,"film","Indie & Auteur","Opening “Choose Life” run","21YxK0klhpfLW8budkJaMF"],
+    ["Perfect Day","Lou Reed","Trainspotting",1996,"film","Indie & Auteur","Overdose scene","0MU4ibzI7BOhsagnLSc3pP"],
+    ["Born Slippy .NUXX","Underworld","Trainspotting",1996,"film","Indie & Auteur","Closing London walk","2bdWtqHiadkjbzjh8bZSk0"],
+    ["These Days","Nico","The Royal Tenenbaums",2001,"film","Indie & Auteur","Margot steps off the bus","1gWPkS4xum4XbSt1ueNpUu"],
+    ["Needle in the Hay","Elliott Smith","The Royal Tenenbaums",2001,"film","Indie & Auteur","Richie's suicide attempt","6WuRo5MdVrpKCl6lkKIAlp"],
+    ["Ooh La La","Faces","Rushmore",1998,"film","Indie & Auteur","Closing slow-motion dance","4lJ6YVXQ0jUk5ILu0PSrA4"],
+    ["New Slang","The Shins","Garden State",2004,"film","Indie & Auteur","“It'll change your life” scene","1wAqhAF1dynDjMy7m5CSSE"],
+    ["Please, Please, Please, Let Me Get What I Want","The Smiths","(500) Days of Summer",2009,"film","Indie & Auteur","Morning-after elevator","4PDinuDWBOayYwViDYTvfV"],
+    ["Just Like Honey","The Jesus and Mary Chain","Lost in Translation",2003,"film","Indie & Auteur","Closing goodbye scene","1LwP9g1Hjbs64jXM2Qsxry"],
+    ["Playground Love","Air","The Virgin Suicides",1999,"film","Indie & Auteur","Recurring theme","0qSkffeyk2FEIumqDgsYP1"],
+    ["Mad World","Gary Jules","Donnie Darko",2001,"film","Indie & Auteur","Closing montage","5HvnKCEQaV1ikKkfJHShCj"],
+    ["Mystery of Love","Sufjan Stevens","Call Me by Your Name",2017,"film","Indie & Auteur","Peach-orchard bike ride","0MNNKSUU9OOQ8DSGWduw79"],
+    ["Love My Way","The Psychedelic Furs","Call Me by Your Name",2017,"film","Indie & Auteur","Villa dance party","4dk40nfaQav6b4ZsJ9OYUo"],
+    ["Unchained Melody","The Righteous Brothers","Ghost",1990,"film","Romance","Pottery-wheel scene","0cHHEv6a4gMCaQa9Gmute2"],
+    ["My Heart Will Go On","Celine Dion","Titanic",1997,"film","Romance","End-credits theme","5ADr3HI3SdXSatwtJHYV31"],
+    ["Shallow","Lady Gaga & Bradley Cooper","A Star Is Born",2018,"film","Romance","First duet on stage","5lK18Pt33xNudq4qYDxIm8"],
+    ["Falling Slowly","Glen Hansard & Markéta Irglová","Once",2007,"film","Romance","Music-shop piano duet","0NXMkkCX5yI7FnLK0MQUF0"],
+    ["She","Elvis Costello","Notting Hill",1999,"film","Romance","Closing montage","1pPhlk4PP5xMmzsDsFh5Yd"],
+    ["Kissing You","Des'ree","Romeo + Juliet",1996,"film","Romance","Fish-tank first meeting","5irDthoE4sHE057hdfovwq"],
+    ["Lovefool","The Cardigans","Romeo + Juliet",1996,"film","Romance","Capulet masquerade ball","4ufwVxhfb5z89srsiq195X"],
+    ["Stayin' Alive","Bee Gees","Saturday Night Fever",1977,"film","Dance Floor","Opening sidewalk strut","0icq5hYvd7y0JqFjiSHGky"],
+    ["Sister Christian","Night Ranger","Boogie Nights",1997,"film","Dance Floor","Alfred Molina's dealer scene","57trQKFZdJxHia4sMJioWk"],
+    ["Jessie's Girl","Rick Springfield","Boogie Nights",1997,"film","Dance Floor","Same dealer-den needle drop","1sgfjgLRCqSfndpofU8T2C"],
+    ["Time Warp","Rocky Horror Picture Show Cast","The Rocky Horror Picture Show",1975,"film","Dance Floor","Frank-N-Furter's lab number","5NKJiNKzTKhngioWcqTvuA"],
+    ["Running Up That Hill","Kate Bush","Stranger Things",2022,"tv","TV Drama","Max outruns Vecna — Season 4","1PtQJZVZIdWIYdARpZRDFO"],
+    ["Should I Stay or Should I Go","The Clash","Stranger Things",2016,"tv","TV Drama","Will's Upside Down signal — Season 1","0M4MUFxufVAmuauXvuULbs"],
+    ["Master of Puppets","Metallica","Stranger Things",2022,"tv","TV Drama","Eddie's guitar solo — Season 4","7HwB4zc7tS1lyw4Ay7fcmq"],
+    ["Don't Stop Believin'","Journey","The Sopranos",2007,"tv","TV Drama","Diner cut-to-black finale","3HRQtRUYnnuZY7fE900XtJ"],
+    ["Woke Up This Morning (Chosen One Mix)","Alabama 3","The Sopranos",1999,"tv","TV Drama","Opening-titles theme","3TjlENVEU3a0s6s8BXyobq"],
+    ["Breathe Me","Sia","Six Feet Under",2005,"tv","TV Drama","Series-finale flash-forward montage","6hrgeEo1WQOHVeF8QMv68S"],
+    ["Chasing Cars","Snow Patrol","Grey's Anatomy",2006,"tv","TV Drama","Season 2 finale, “Deny deny deny”","11bD1JtSjlIgKgZG2134DZ"],
+    ["Hide and Seek","Imogen Heap","The O.C.",2004,"tv","TV Drama","Marissa shoots Trey — Season 1 finale","2tej1KSqNuxwywIpY1rDRc"],
+    ["New Noise","Refused","The Bear",2022,"tv","TV Drama","“The Beef” kitchen chaos — Season 1","35iLpqqQg4KrfYAzbvN1vH"],
+    ["Istanbul (Not Constantinople)","They Might Be Giants","The Umbrella Academy",2019,"tv","TV Drama","Dance-battle training scene","63vL5oxWrlvaJ0ayNaQnbX"],
+    ["Africa","Toto","The Umbrella Academy",2019,"tv","TV Drama","Family car singalong","0PX5DeeFUEVhA5LEeomIlG"],
+    ["In the Air Tonight","Phil Collins","Miami Vice",1984,"tv","TV Drama","Pilot-episode driving scene","6MjfEIHOMW6MaDO3LpFcmW"],
+    ["Way Down in the Hole","Tom Waits","The Wire",2002,"tv","TV Theme","Opening titles, Season 1 version","27MNsCvgxqdBE2CICEXkrY"],
+    ["Red Right Hand","Nick Cave and the Bad Seeds","Peaky Blinders",2013,"tv","TV Theme","Opening titles","2rEejosMFFiQkveFvb9P0Q"],
+    ["Far From Any Road","The Handsome Family","True Detective",2014,"tv","TV Theme","Season 1 opening titles","1PmWRQ2TPB5FCOvinqx7ql"],
+    ["Teardrop","Massive Attack","House, M.D.",2004,"tv","TV Theme","Opening titles","2t8KMDAdHeabL0i8OFO6Yd"],
+    ["California","Phantom Planet","The O.C.",2003,"tv","TV Theme","Opening titles","2LFMWAOFyVJypKBgOFfdok"],
+    ["Bad Reputation","Joan Jett","Freaks and Geeks",1999,"tv","TV Theme","Opening titles","7pu8AhGUxHZSCWTkQ2eb5M"],
+    ["Tank!","The Seatbelts","Cowboy Bebop",1998,"tv","TV Theme","Opening titles","5NPUvo85ixwylV05gX8qN8"],
+    ["Cold Little Heart","Michael Kiwanuka","Big Little Lies",2017,"tv","TV Theme","Opening titles","4vVRdmiVXWeT0UxkF5Nenj"],
+    ["Dreams","The Cranberries","Derry Girls",2018,"tv","TV Theme","Opening titles","7qNThU0HuoF8JRnWgF06TO"],
+    ["Hallelujah","John Cale","Shrek",2001,"film","Animation","Shrek finds Fiona gone","1OIg1rSlLKu5xD1x1bfVJo"],
+    ["All Star","Smash Mouth","Shrek",2001,"film","Animation","Opening swamp scene","3cfOd4CMv2snFaKAnMdnvK"]
+  ].map(([song,artist,source,year,media,tag,note,spotifyId])=>({song,artist,source,year,media,tag,note,spotifyId}));
+
+  const listEl = document.getElementById('list');
+  const chipsEl = document.getElementById('chips');
+  const searchEl = document.getElementById('search');
+  const countEl = document.getElementById('count');
+  const emptyEl = document.getElementById('empty');
+  const playerEmpty = document.getElementById('playerEmpty');
+  const playerTrack = document.getElementById('playerTrack');
+  const pSong = document.getElementById('pSong');
+  const pMeta = document.getElementById('pMeta');
+
+  const TAGS = [...new Set(TRACKS.map(t=>t.tag))];
+  let activeTag = 'All';
+
+  // ---------- Spotify IFrame API ----------
+  let spotifyController = null;
+  let pendingTrack = null; // {idx} queued if a title is clicked before the API is ready
+
+  window.onSpotifyIframeApiReady = (IFrameAPI) => {
+    const element = document.getElementById('spotify-embed');
+    const options = { uri: '', width: '100%', height: '80' };
+    IFrameAPI.createController(element, options, (EmbedController) => {
+      spotifyController = EmbedController;
+      if (pendingTrack !== null) {
+        const idx = pendingTrack;
+        pendingTrack = null;
+        playTrack(idx);
+      }
+    });
+  };
+
+  function playTrack(idx){
+    const t = TRACKS[idx];
+    if (!spotifyController) {
+      pendingTrack = idx;
+      pSong.textContent = `Loading player… will play “${t.song}”`;
+      playerEmpty.style.display = 'none';
+      playerTrack.classList.add('active');
+      return;
+    }
+    spotifyController.loadUri('spotify:track:' + t.spotifyId);
+    spotifyController.play();
+
+    playerEmpty.style.display = 'none';
+    playerTrack.classList.add('active');
+    pSong.textContent = t.song;
+    pMeta.textContent = `${t.artist} · ${t.source} (${t.year})`;
+
+    document.querySelectorAll('.row.playing').forEach(r => r.classList.remove('playing'));
+    const row = document.querySelector(`.row[data-idx="${idx}"]`);
+    if (row) row.classList.add('playing');
+  }
+
+  function renderChips(){
+    const all = ['All', ...TAGS];
+    chipsEl.innerHTML = all.map(tag =>
+      `<button class="chip${tag===activeTag?' active':''}" data-tag="${tag}" type="button">${tag}</button>`
+    ).join('');
+    chipsEl.querySelectorAll('.chip').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        activeTag = btn.dataset.tag;
+        render();
+      });
+    });
+  }
+
+  function render(){
+    const q = searchEl.value.trim().toLowerCase();
+    const filtered = TRACKS
+      .map((t, idx) => ({...t, idx}))
+      .filter(t=>{
+        const matchesTag = activeTag === 'All' || t.tag === activeTag;
+        const matchesQ = !q || [t.song,t.artist,t.source].some(f=>f.toLowerCase().includes(q));
+        return matchesTag && matchesQ;
+      });
+
+    countEl.textContent = `${filtered.length} shown`;
+    emptyEl.style.display = filtered.length ? 'none' : 'block';
+
+    listEl.innerHTML = filtered.map((t,i)=>`
+      <div class="row" data-idx="${t.idx}">
+        <div class="idx">${String(i+1).padStart(2,'0')}</div>
+        <div class="meta">
+          <div class="title-line">
+            <button class="song-btn" data-idx="${t.idx}" type="button">${t.song}</button>
+            <span class="artist">${t.artist}</span>
+          </div>
+          <div class="source-line"><span class="src">${t.source}</span> · <span class="year">${t.year}</span> · ${t.media === 'tv' ? 'TV' : 'Film'}</div>
+          <div class="note-line">${t.note}</div>
+          <span class="tag-pill">${t.tag}</span>
+        </div>
+      </div>
+    `).join('');
+
+    listEl.querySelectorAll('.song-btn').forEach(btn=>{
+      btn.addEventListener('click', ()=> playTrack(Number(btn.dataset.idx)));
+    });
+  }
+
+  renderChips();
+  render();
+  searchEl.addEventListener('input', render);
+</script>
+
+<script src="https://open.spotify.com/embed/iframe-api/v1" async></script>
+</body>
+</html>
